@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '8.0'
+
+target 'TPFCarousel_Example' do
+  pod 'TPFCarousel', :path => '../'
+
+  target 'TPFCarousel_Tests' do
+    inherit! :search_paths
+
+    pod 'FBSnapshotTestCase'
+  end
+end
