@@ -1,0 +1,6 @@
+framework module Pods_TPFCarousel_Tests {
+  umbrella header "Pods-TPFCarousel_Tests-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,6 @@
+framework module TPFCarousel {
+  umbrella header "TPFCarousel-umbrella.h"
+
+  export *
+  module * { export * }
+}
