@@ -43,9 +43,10 @@
 #pragma mark public API
 -(void)restoreZoom{
     self.scrollView.zoomScale = 1.0f;
-    self.scrollView.contentSize = CGSizeMake(0, 0);
+    self.scrollView.contentSize = CGSizeMake(self.frame.size.width, self.frame.size.height);
     self.scrollView.contentOffset = CGPointMake(0, 0);
     self.imageView.center = CGPointMake(self.frame.size.width/2, self.frame.size.height/2);
+    self.imageView.frame = CGRectMake(0,0,self.frame.size.width, self.frame.size.height);
     
     if(_zoomChanged)
         _zoomChanged(self,self.scrollView.zoomScale,self.imageView.center);

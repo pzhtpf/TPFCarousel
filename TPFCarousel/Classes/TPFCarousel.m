@@ -85,6 +85,7 @@
 
 #pragma mark private method
 - (void)exchangePosition:(UIScrollView *)scrollView {
+    [self syncImageZoomState];
     if (scrollView.contentOffset.x == 0) {
         [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
             if (obj.frame.origin.x == 0) {
@@ -104,7 +105,6 @@
     }
     scrollView.contentOffset = CGPointMake(self.width + self.space, 0);
     [self getSelectedIndex];
-    [self loadMainImage];
     [self loadOtherImage];
     [self resetImageZoomState];
 
@@ -142,7 +142,9 @@
             int index = MIN(self.selectedIndex, (int)self.images.count - 1);
             index = MAX(0, index);
             obj.imageObject = self.images[index];
+            __weak typeof(self) weakSelf = self;
             [obj starLoading:^(BOOL loadingFinished) {
+                [weakSelf loadOtherImage];
             }];
         }
     }];
@@ -190,14 +192,49 @@
         _timer = nil;
     }
 }
-
+-(void)syncImageZoomState{
+     
+    if(!self.zoom)
+        return;
+    
+     [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *previewImageView, NSUInteger idx, BOOL *_Nonnull stop) {
+         if(previewImageView.frame.origin.x == self.width + self.space){
+           TPFImageZoomState *imageZoomState = [self.imageZoomStates valueForKey:previewImageView.imageObject];
+             
+             if(previewImageView.scrollView.zoomScale!=1){
+                if (!imageZoomState) imageZoomState = [TPFImageZoomState new];
+        
+                imageZoomState.zoomScale = previewImageView.scrollView.zoomScale;
+                imageZoomState.contentSize = previewImageView.scrollView.contentSize;
+                imageZoomState.contentOffset = previewImageView.scrollView.contentOffset;
+                CGRect imageFrame = previewImageView.imageView.frame;
+                imageZoomState.imageFrame = CGRectMake(0, 0, imageFrame.size.width, imageFrame.size.height);
+                imageZoomState.center = CGPointMake(previewImageView.imageView.center.x, previewImageView.imageView.center.y);
+                [self.imageZoomStates setValue:imageZoomState forKey:previewImageView.imageObject];
+             }
+             else if (imageZoomState){
+                 [self.imageZoomStates removeObjectForKey:previewImageView.imageObject];
+             }
+         }
+        }];
+}
 - (void)resetImageZoomState {
+    
+    if(!self.zoom)
+        return;
+    
     [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *tempPreviewImageView, NSUInteger idx, BOOL *_Nonnull stop) {
         TPFImageZoomState *imageZoomState = [self.imageZoomStates valueForKey:tempPreviewImageView.imageObject];
-        tempPreviewImageView.scrollView.zoomScale = imageZoomState.zoomScale;
-        tempPreviewImageView.scrollView.contentSize = imageZoomState.contentSize;
-        tempPreviewImageView.scrollView.contentOffset = imageZoomState.contentOffset;
-        tempPreviewImageView.imageView.center = imageZoomState.center;
+            if(imageZoomState){
+                tempPreviewImageView.scrollView.zoomScale = imageZoomState.zoomScale;
+                tempPreviewImageView.scrollView.contentSize = imageZoomState.contentSize;
+                tempPreviewImageView.scrollView.contentOffset = imageZoomState.contentOffset;
+                tempPreviewImageView.imageView.center = imageZoomState.center;
+                tempPreviewImageView.imageView.frame = imageZoomState.imageFrame;
+            }
+            else{
+                [tempPreviewImageView restoreZoom];
+            }
     }];
 }
 
@@ -226,7 +263,6 @@
         [self.scrollView setContentSize:CGSizeMake((self.width + self.space) * 3, self.height)];
         self.scrollView.contentOffset = CGPointMake(self.width + self.space, 0);
         [self loadMainImage];
-        [self loadOtherImage];
     }
 
     _pageControl.currentPage = self.selectedIndex;
@@ -288,18 +324,6 @@
 
     [self.scrollView addSubview:imageView];
     [self.imageViewArray addObject:imageView];
-
-    __weak typeof(self) weakSelf = self;
-    imageView.zoomChanged = ^(SCEPreviewImageView *previewImageView, float scale, CGPoint centerPoint) {
-        TPFImageZoomState *imageZoomState = [weakSelf.imageZoomStates valueForKey:previewImageView.imageObject];
-        if (!imageZoomState) imageZoomState = [TPFImageZoomState new];
-
-        imageZoomState.zoomScale = scale;
-        imageZoomState.contentSize = previewImageView.scrollView.contentSize;
-        imageZoomState.contentOffset = previewImageView.scrollView.contentOffset;
-        imageZoomState.center = centerPoint;
-        [weakSelf.imageZoomStates setValue:imageZoomState forKey:previewImageView.imageObject];
-    };
 
     return imageView;
 }

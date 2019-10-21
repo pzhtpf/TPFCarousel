@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic) CGSize contentSize;
 @property(nonatomic) CGPoint contentOffset;
 @property(nonatomic) CGPoint center;
+@property(nonatomic) CGRect imageFrame;
 
 @end
 
