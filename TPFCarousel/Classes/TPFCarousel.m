@@ -16,6 +16,7 @@
 @property(nonatomic) float height;
 @property(nonatomic) float mainOriginX;
 @property(strong,nonatomic) NSTimer *timer;
+@property(strong,nonatomic) UIPageControl *pageControl;
 
 @end
 
@@ -42,6 +43,8 @@
     self.clipsToBounds = YES;
     self.layer.masksToBounds = YES;
     self.userInteractionEnabled = YES;
+    _indicatorColor = [UIColor colorWithRed:215/255.0 green:215/255.0 blue:215/255.0 alpha:0.67];;
+    _indicatorActiveColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:1];
     
     [self addSubview:self.scrollView];
     
@@ -123,6 +126,7 @@
        }
     }];
     
+    _pageControl.currentPage = self.selectedIndex;
     NSLog(@"当前选中：%d",self.selectedIndex);
 }
 -(void)loadMainImage{
@@ -184,6 +188,7 @@
 #pragma mark setter
 -(void)setImages:(NSArray *)images{
     _images = images;
+    _pageControl.numberOfPages = _images.count;
     
     [_imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj removeFromSuperview];
@@ -210,6 +215,8 @@
         [self loadMainImage];
         [self loadOtherImage];
     }
+    
+    _pageControl.currentPage = self.selectedIndex;
 }
 -(void)setSpace:(int)space{
     _space = space;
@@ -228,6 +235,29 @@
     _interval = interval;
     [self startAutoScroll];
 }
+-(void)setIndicatorDots:(Boolean)indicatorDots{
+    _indicatorDots = indicatorDots;
+    if(_indicatorDots){
+        [self addSubview:self.pageControl];
+    }
+    else{
+        [_pageControl removeFromSuperview];
+    }
+}
+-(void)setIndicatorColor:(UIColor *)indicatorColor{
+    _indicatorColor = indicatorColor;
+    _pageControl.pageIndicatorTintColor = _indicatorColor;
+}
+-(void)setIndicatorActiveColor:(UIColor *)indicatorActiveColor{
+    _indicatorActiveColor = indicatorActiveColor;
+    _pageControl.currentPageIndicatorTintColor = _indicatorActiveColor;
+}
+-(void)setZoom:(Boolean)zoom{
+    _zoom = zoom;
+    [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        obj.zoom = _zoom;
+    }];
+}
 #pragma mark getter
 - (SCEPreviewImageView *)getImageView:(int)index {
     SCEPreviewImageView *imageView = [[SCEPreviewImageView alloc] initWithFrame:CGRectMake(index * (self.width + self.space), 0, self.width, self.height)];
@@ -235,6 +265,7 @@
 
     imageView.index = index;
     imageView.imageView.contentMode = self.contentMode;
+    imageView.zoom = self.zoom;
 
     [self.scrollView addSubview:imageView];
     [self.imageViewArray addObject:imageView];
@@ -266,5 +297,15 @@
         _scrollView.delegate = self;
     }
     return _scrollView;
+}
+-(UIPageControl *)pageControl{
+    if(!_pageControl){
+        float pageControlWidth = self.width;
+        _pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake((self.width-pageControlWidth)/2, self.height-30,pageControlWidth, 20)];
+        _pageControl.currentPage = self.selectedIndex;
+        _pageControl.pageIndicatorTintColor = _indicatorColor;
+        _pageControl.currentPageIndicatorTintColor = _indicatorActiveColor;
+    }
+    return _pageControl;
 }
 @end

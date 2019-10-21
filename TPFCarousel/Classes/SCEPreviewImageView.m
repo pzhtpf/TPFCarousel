@@ -34,26 +34,11 @@
 }
 -(void)initView{
     
-    self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
-    [self addSubview:self.scrollView];
-    
     self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
     self.imageView.contentMode = 1;
     self.imageView.tag = 100;
-    [self.scrollView addSubview:self.imageView];
-    
-//    [self.imageView mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.leading.mas_equalTo(self);
-//        make.trailing.mas_equalTo(self);
-//        make.top.mas_equalTo(self);
-//        make.bottom.mas_equalTo(self);
-//        make.center.mas_equalTo(self);
-//    }];
-//
-    self.scrollView.maximumZoomScale = 3;
-    self.scrollView.multipleTouchEnabled = YES;
-    self.scrollView.alwaysBounceVertical = NO;
-    self.scrollView.delegate = self;
+    self.imageView.clipsToBounds = YES;
+    [self addSubview:self.imageView];
 }
 #pragma mark public API
 -(void)restoreZoom{
@@ -107,6 +92,17 @@
         self.loadingFinishedBlock(self.loadingFinished);
 }
 #pragma mark setter
+-(void)setZoom:(Boolean)zoom{
+    _zoom = zoom;
+      if(self.zoom){
+         [self addSubview:self.scrollView];
+         [self.scrollView addSubview:self.imageView];
+     }
+     else{
+         [self addSubview:self.imageView];
+         [_scrollView removeFromSuperview];
+     }
+}
 -(void)setFrame:(CGRect)frame{
     [super setFrame:frame];
     self.scrollView.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
@@ -165,6 +161,18 @@
     }];
 }
 #pragma mark getter
+-(UIScrollView *)scrollView{
+    if(!_scrollView){
+        _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
+              
+       _scrollView.maximumZoomScale = 3;
+       _scrollView.multipleTouchEnabled = YES;
+       _scrollView.alwaysBounceVertical = NO;
+       _scrollView.delegate = self;
+
+    }
+    return _scrollView;
+}
 -(UIActivityIndicatorView *)activityIndicatorView{
     if(!_activityIndicatorView){
         _activityIndicatorView = [[UIActivityIndicatorView alloc] init];

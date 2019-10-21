@@ -37,6 +37,8 @@ typedef void(^SelectedIndexChanged)(int selectedIndex);
 @property(nonatomic) float duration;
 /* 滑动结束后的回调 */
 @property(nonatomic) SelectedIndexChanged selectedIndexChanged;
+/* 是否允许缩放 */
+@property(nonatomic) Boolean zoom;
 
 @end
 

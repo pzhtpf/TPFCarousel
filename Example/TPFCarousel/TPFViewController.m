@@ -27,9 +27,10 @@
     self.carousel.selectedIndex = 1;
     self.carousel.layer.cornerRadius = 10;
     self.carousel.contentMode = UIViewContentModeScaleAspectFill;
-    self.carousel.space = 10;
+    self.carousel.space = 5;
     self.carousel.autoplay = YES;
     self.carousel.interval = 5;
+    self.carousel.indicatorDots = YES;
     self.carousel.selectedIndexChanged = ^(int selectedIndexChanged){
         NSLog(@"回调后的选中：%d",selectedIndexChanged);
     };

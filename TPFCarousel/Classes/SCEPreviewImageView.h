@@ -23,6 +23,7 @@ typedef void(^LoadingFinishedBlock)(BOOL loadingFinished);
 @property(strong,nonatomic) UIImageView *imageView;
 
 @property(nonatomic) ZoomChanged zoomChanged;
+@property(nonatomic) Boolean zoom;
 
 -(void)starLoading:(void(^)(BOOL loadingFinished)) loadingFinishedBlock;
 -(void)cancelLoading;
