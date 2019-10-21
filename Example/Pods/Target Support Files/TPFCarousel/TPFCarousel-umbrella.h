@@ -12,6 +12,7 @@
 
 #import "SCEPreviewImageView.h"
 #import "TPFCarousel.h"
+#import "TPFImageZoomState.h"
 
 FOUNDATION_EXPORT double TPFCarouselVersionNumber;
 FOUNDATION_EXPORT const unsigned char TPFCarouselVersionString[];
