@@ -88,13 +88,15 @@
 -(void)starLoading:(void (^)(BOOL))loadingFinishedBlock{
     self.loadingFinishedBlock = loadingFinishedBlock;
     
-    if(!self.loadingFinished){
-        self.url = _imageObject;
-    }
-    else{
-        if(self.loadingFinishedBlock)
-            self.loadingFinishedBlock(self.loadingFinished);
-    }
+//    if(!self.loadingFinished){
+//        self.url = _imageObject;
+//    }
+//    else{
+//        if(self.loadingFinishedBlock)
+//            self.loadingFinishedBlock(self.loadingFinished);
+//    }
+    
+    self.url = _imageObject;
 }
 -(void)cancelLoading{
     if(self.url){

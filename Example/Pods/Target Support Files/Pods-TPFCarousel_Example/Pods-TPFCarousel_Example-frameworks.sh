@@ -162,6 +162,7 @@ strip_invalid_archs() {
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/Masonry/Masonry.framework"
+  install_framework "${PODS_ROOT}/Reveal-SDK/RevealServer-20/iOS/RevealServer.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/TPFCarousel/TPFCarousel.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/YYCache/YYCache.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/YYImage/YYImage.framework"
@@ -169,6 +170,7 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/Masonry/Masonry.framework"
+  install_framework "${PODS_ROOT}/Reveal-SDK/RevealServer-20/iOS/RevealServer.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/TPFCarousel/TPFCarousel.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/YYCache/YYCache.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/YYImage/YYImage.framework"
