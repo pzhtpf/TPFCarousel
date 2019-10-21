@@ -10,6 +10,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^SelectedIndexChanged)(int selectedIndex);
+typedef void(^ItemClicked)(int selectedIndex);
+
 
 @interface TPFCarousel : UIView
 
@@ -37,8 +39,14 @@ typedef void(^SelectedIndexChanged)(int selectedIndex);
 @property(nonatomic) float duration;
 /* 滑动结束后的回调 */
 @property(nonatomic) SelectedIndexChanged selectedIndexChanged;
-/* 是否允许缩放 */
+/* 某一条被点击后回调 */
+@property(nonatomic) ItemClicked itemClicked;
+/* 是否允许缩放 默认false */
 @property(nonatomic) Boolean zoom;
+/* 是否允许重力感应旋转 默认false */
+@property(nonatomic) Boolean allowGravityRotate;
+
+
 
 @end
 

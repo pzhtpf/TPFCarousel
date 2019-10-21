@@ -11,6 +11,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface TPFRotationViewManager : NSObject
 
+@property(weak,nonatomic) UIView *targetView;
+- (void)rotationView:(float)angle;
+-(void)startMotionManager;
+-(void)stopMotionManager;
+
 @end
 
 NS_ASSUME_NONNULL_END

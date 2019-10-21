@@ -8,6 +8,7 @@
 #import "TPFCarousel.h"
 #import "SCEPreviewImageView.h"
 #import "TPFImageZoomState.h"
+#import "TPFRotationViewManager.h"
 
 @interface TPFCarousel ()<UIScrollViewDelegate>
 
@@ -19,6 +20,7 @@
 @property (strong, nonatomic) NSTimer *timer;
 @property (strong, nonatomic) UIPageControl *pageControl;
 @property (strong, nonatomic) NSMutableDictionary<NSString *, TPFImageZoomState *> *imageZoomStates;
+@property (strong, nonatomic) TPFRotationViewManager *rotationViewManager;
 
 @end
 
@@ -55,6 +57,8 @@
 
     _imageViewArray = [NSMutableArray new];
     _imageZoomStates = [NSMutableDictionary new];
+    
+    [self addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(itemClickd:)]];
 }
 
 #pragma mark UIScrollViewDelegate
@@ -237,6 +241,10 @@
             }
     }];
 }
+-(void)itemClickd:(UITapGestureRecognizer *)tapGestureRecognizer{
+   if(_itemClicked)
+       _itemClicked(self.selectedIndex);
+}
 
 #pragma mark setter
 - (void)setImages:(NSArray *)images {
@@ -313,6 +321,16 @@
     }];
 }
 
+- (void)setAllowGravityRotate:(Boolean)allowGravityRotate{
+    _allowGravityRotate = allowGravityRotate;
+    if(_allowGravityRotate){
+        [self.rotationViewManager startMotionManager];
+    }
+    else{
+        [_rotationViewManager stopMotionManager];
+    }
+}
+
 #pragma mark getter
 - (SCEPreviewImageView *)getImageView:(int)index {
     SCEPreviewImageView *imageView = [[SCEPreviewImageView alloc] initWithFrame:CGRectMake(index * (self.width + self.space), 0, self.width, self.height)];
@@ -353,5 +371,11 @@
     }
     return _pageControl;
 }
-
+-(TPFRotationViewManager *)rotationViewManager{
+    if(!_rotationViewManager){
+        _rotationViewManager = [[TPFRotationViewManager alloc] init];
+        _rotationViewManager.targetView = self;
+    }
+    return _rotationViewManager;
+}
 @end
