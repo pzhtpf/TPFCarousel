@@ -30,15 +30,15 @@ typedef NS_ENUM(NSInteger, ScrollDirection) {
 @property(nonatomic) int selectedIndex;
 /* 滑动时两个图片之间的距离 */
 @property(nonatomic) int space;
-/* 允许轮播 */
+/* 允许轮播,设置autoplay为true时，此属性默认true */
 @property(nonatomic) BOOL allowCircular;
 /* 内容模式 */
 @property(nonatomic) UIViewContentMode contentMode;
 /* 是否显示面板指示点  默认false */
 @property(nonatomic) Boolean indicatorDots;
-/* 指示点颜色  默认rgba(0, 0, 0, 0.3) */
+/* 指示点颜色  默认rgba(215/255.0, 215/255.0, 215/255.0, 0.67) */
 @property(strong,nonatomic) UIColor *indicatorColor ;
-/* 当前选中的指示点颜色  默认0x000000 */
+/* 当前选中的指示点颜色  默认0xFFFFFF */
 @property(strong,nonatomic) UIColor *indicatorActiveColor ;
 /* 是否自动切换   默认false */
 @property(nonatomic) Boolean autoplay;

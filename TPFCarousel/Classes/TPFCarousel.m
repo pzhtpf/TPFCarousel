@@ -91,7 +91,14 @@
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    if (scrollView.contentOffset.x != (self.width + self.space)) [self exchangePosition:scrollView];
+    if(self.allowCircular){
+      if (scrollView.contentOffset.x != (self.width + self.space)) [self exchangePosition:scrollView];
+    }
+  else{
+      [self exchangePosition:scrollView];
+  }
+    
+    
     self.autoplay = _autoplay;
 }
 
@@ -101,7 +108,25 @@
 }
 
 #pragma mark private method
+-(BOOL)getAllowCircularStatus{
+    if(self.allowCircular)
+        return self.allowCircular;
+    else{
+        if((self.scrollDirection == ScrollDirectionLeft && self.selectedIndex==self.images.count-1) ||
+           (self.scrollDirection == ScrollDirectionRight && self.selectedIndex==0))
+            return false;
+        
+        return true;
+    }
+}
 - (void)exchangePosition:(UIScrollView *)scrollView {
+    
+    [self getSelectedIndex];
+    
+    if(!self.allowCircular && (self.selectedIndex==0 || self.selectedIndex== self.images.count-1)){
+        return;
+    }
+    
     [self syncImageZoomState];
     if (scrollView.contentOffset.x == 0) {
         [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
@@ -121,7 +146,6 @@
         }];
     }
 
-    [self getSelectedIndex];
     scrollView.contentOffset = CGPointMake(self.width + self.space, 0);
     [self loadMainImage];
     [self resetImageZoomState];
@@ -130,6 +154,12 @@
 }
 
 - (void)getSelectedIndex {
+    
+    if(![self getAllowCircularStatus]){
+        self.scrollDirection = ScrollDirectionNone;
+        return;
+    }
+    
     if (self.scrollDirection == ScrollDirectionRight) self.selectedIndex--;
     else if (self.scrollDirection == ScrollDirectionLeft) self.selectedIndex++;
 
@@ -285,11 +315,17 @@
     _autoplay = autoplay;
     if (_autoplay) {
         [self startAutoScroll];
+        _allowCircular = true;
     } else {
         [self stopAutoScroll];
     }
 }
-
+-(void)setAllowCircular:(BOOL)allowCircular{
+    if(_autoplay)
+        _allowCircular = true;
+    else
+        _allowCircular = allowCircular;
+}
 - (void)setInterval:(float)interval {
     _interval = interval;
     [self startAutoScroll];
