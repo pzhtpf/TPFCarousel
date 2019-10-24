@@ -6,21 +6,23 @@
 //
 
 #import "TPFCarousel.h"
-#import "SCEPreviewImageView.h"
+#import "TPFPreviewImageView.h"
 #import "TPFImageZoomState.h"
 #import "TPFRotationViewManager.h"
 
 @interface TPFCarousel ()<UIScrollViewDelegate>
 
 @property (strong, nonatomic) UIScrollView *scrollView;
-@property (strong, nonatomic) NSMutableArray<SCEPreviewImageView *> *imageViewArray;
+@property (strong, nonatomic) NSMutableArray<TPFPreviewImageView *> *imageViewArray;
 @property (nonatomic) float width;
 @property (nonatomic) float height;
 @property (nonatomic) float mainOriginX;
+@property (nonatomic) ScrollDirection scrollDirection;
 @property (strong, nonatomic) NSTimer *timer;
 @property (strong, nonatomic) UIPageControl *pageControl;
 @property (strong, nonatomic) NSMutableDictionary<NSString *, TPFImageZoomState *> *imageZoomStates;
 @property (strong, nonatomic) TPFRotationViewManager *rotationViewManager;
+@property (nonatomic) Boolean isExchanging;
 
 @end
 
@@ -57,7 +59,7 @@
 
     _imageViewArray = [NSMutableArray new];
     _imageZoomStates = [NSMutableDictionary new];
-    
+
     [self addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(itemClickd:)]];
 }
 
@@ -66,24 +68,35 @@
 }
 
 - (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView {
-    NSLog(@"scrollViewWillBeginDecelerating");
+//    NSLog(@"scrollViewWillBeginDecelerating");
 }
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
-    NSLog(@"scrollViewWillBeginDragging");
+//    NSLog(@"scrollViewWillBeginDragging");
     [self stopAutoScroll];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+//    NSLog(@"scrollViewDidEndDragging");
+
+    if ([scrollView.panGestureRecognizer translationInView:scrollView.superview].x > 0) {
+        // handle dragging to the right
+        NSLog(@"右");
+        self.scrollDirection = ScrollDirectionRight;
+    } else {
+        // handle dragging to the left
+        NSLog(@"左");
+        self.scrollDirection = ScrollDirectionLeft;
+    }
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    [self exchangePosition:scrollView];
+    if (scrollView.contentOffset.x != (self.width + self.space)) [self exchangePosition:scrollView];
     self.autoplay = _autoplay;
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
-    NSLog(@"scrollViewDidEndScrollingAnimation");
+//    NSLog(@"scrollViewDidEndScrollingAnimation");
     [self exchangePosition:scrollView];
 }
 
@@ -91,7 +104,7 @@
 - (void)exchangePosition:(UIScrollView *)scrollView {
     [self syncImageZoomState];
     if (scrollView.contentOffset.x == 0) {
-        [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+        [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
             if (obj.frame.origin.x == 0) {
                 obj.frame = CGRectMake(self.width + self.space, 0, self.width, self.height);
             } else if (obj.frame.origin.x == self.width + self.space) {
@@ -99,7 +112,7 @@
             }
         }];
     } else if (scrollView.contentOffset.x == (self.width + self.space) * 2) {
-        [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+        [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
             if (obj.frame.origin.x == self.width + self.space) {
                 obj.frame = CGRectMake((self.width + self.space) * 2, 0, self.width, self.height);
             } else if (obj.frame.origin.x == (self.width + self.space) * 2) {
@@ -107,41 +120,30 @@
             }
         }];
     }
-    scrollView.contentOffset = CGPointMake(self.width + self.space, 0);
+
     [self getSelectedIndex];
-    [self loadOtherImage];
+    scrollView.contentOffset = CGPointMake(self.width + self.space, 0);
+    [self loadMainImage];
     [self resetImageZoomState];
 
     if (_selectedIndexChanged) _selectedIndexChanged(_selectedIndex);
 }
 
 - (void)getSelectedIndex {
-    [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
-        if (obj.frame.origin.x == self.width + self.space) {
-            [self.images enumerateObjectsUsingBlock:^(id _Nonnull imageObj, NSUInteger imageObjIdx, BOOL *_Nonnull stop) {
-                if ([imageObj isKindOfClass:[NSString class]]) {
-                    NSString *imageUrl = (NSString *)imageObj;
-                    if ([imageUrl isEqualToString:obj.imageObject]) {
-                        self.selectedIndex = (int)imageObjIdx;
-                        *stop = YES;
-                    }
-                } else if ([imageObj isKindOfClass:[UIImage class]]) {
-                    UIImage *image = (UIImage *)imageObj;
-                    if (image == obj.imageObject) {
-                        self.selectedIndex = (int)imageObjIdx;
-                        *stop = YES;
-                    }
-                }
-            }];
-        }
-    }];
+    if (self.scrollDirection == ScrollDirectionRight) self.selectedIndex--;
+    else if (self.scrollDirection == ScrollDirectionLeft) self.selectedIndex++;
+
+    self.selectedIndex = self.selectedIndex > (int)self.images.count - 1 ? 0 : self.selectedIndex;
+    self.selectedIndex = self.selectedIndex < 0 ? (int)self.images.count - 1 : self.selectedIndex;
 
     _pageControl.currentPage = self.selectedIndex;
     NSLog(@"当前选中：%d", self.selectedIndex);
+
+    self.scrollDirection = ScrollDirectionNone;
 }
 
 - (void)loadMainImage {
-    [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+    [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
         if (obj.frame.origin.x == self.mainOriginX) {
             int index = MIN(self.selectedIndex, (int)self.images.count - 1);
             index = MAX(0, index);
@@ -155,7 +157,7 @@
 }
 
 - (void)loadOtherImage {
-    [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+    [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
         if (obj.frame.origin.x == 0) {
             int left = self.selectedIndex - 1;
             left = left < 0 ? (int)self.images.count - 1 : left;
@@ -177,8 +179,10 @@
 }
 
 - (void)autoScroll {
-    if (self.images.count > 1 && self.interval > 0 && self.autoplay) [self.scrollView setContentOffset:CGPointMake((self.width + self.space) * 2, 0) animated:YES];
-    else [self stopAutoScroll];
+    if (self.images.count > 1 && self.interval > 0 && self.autoplay) {
+        self.scrollDirection = ScrollDirectionLeft;
+        [self.scrollView setContentOffset:CGPointMake((self.width + self.space) * 2, 0) animated:YES];
+    } else [self stopAutoScroll];
 }
 
 - (void)startAutoScroll {
@@ -196,18 +200,17 @@
         _timer = nil;
     }
 }
--(void)syncImageZoomState{
-     
-    if(!self.zoom)
-        return;
-    
-     [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *previewImageView, NSUInteger idx, BOOL *_Nonnull stop) {
-         if(previewImageView.frame.origin.x == self.width + self.space){
-           TPFImageZoomState *imageZoomState = [self.imageZoomStates valueForKey:previewImageView.imageObject];
-             
-             if(previewImageView.scrollView.zoomScale!=1){
+
+- (void)syncImageZoomState {
+    if (!self.zoom) return;
+
+    [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *previewImageView, NSUInteger idx, BOOL *_Nonnull stop) {
+        if (previewImageView.frame.origin.x == self.width + self.space) {
+            TPFImageZoomState *imageZoomState = [self.imageZoomStates valueForKey:previewImageView.imageObject];
+
+            if (previewImageView.scrollView.zoomScale != 1) {
                 if (!imageZoomState) imageZoomState = [TPFImageZoomState new];
-        
+
                 imageZoomState.zoomScale = previewImageView.scrollView.zoomScale;
                 imageZoomState.contentSize = previewImageView.scrollView.contentSize;
                 imageZoomState.contentOffset = previewImageView.scrollView.contentOffset;
@@ -215,35 +218,32 @@
                 imageZoomState.imageFrame = CGRectMake(0, 0, imageFrame.size.width, imageFrame.size.height);
                 imageZoomState.center = CGPointMake(previewImageView.imageView.center.x, previewImageView.imageView.center.y);
                 [self.imageZoomStates setValue:imageZoomState forKey:previewImageView.imageObject];
-             }
-             else if (imageZoomState){
-                 [self.imageZoomStates removeObjectForKey:previewImageView.imageObject];
-             }
-         }
-        }];
-}
-- (void)resetImageZoomState {
-    
-    if(!self.zoom)
-        return;
-    
-    [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *tempPreviewImageView, NSUInteger idx, BOOL *_Nonnull stop) {
-        TPFImageZoomState *imageZoomState = [self.imageZoomStates valueForKey:tempPreviewImageView.imageObject];
-            if(imageZoomState){
-                tempPreviewImageView.scrollView.zoomScale = imageZoomState.zoomScale;
-                tempPreviewImageView.scrollView.contentSize = imageZoomState.contentSize;
-                tempPreviewImageView.scrollView.contentOffset = imageZoomState.contentOffset;
-                tempPreviewImageView.imageView.center = imageZoomState.center;
-                tempPreviewImageView.imageView.frame = imageZoomState.imageFrame;
+            } else if (imageZoomState) {
+                [self.imageZoomStates removeObjectForKey:previewImageView.imageObject];
             }
-            else{
-                [tempPreviewImageView restoreZoom];
-            }
+        }
     }];
 }
--(void)itemClickd:(UITapGestureRecognizer *)tapGestureRecognizer{
-   if(_itemClicked)
-       _itemClicked(self.selectedIndex);
+
+- (void)resetImageZoomState {
+    if (!self.zoom) return;
+
+    [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *tempPreviewImageView, NSUInteger idx, BOOL *_Nonnull stop) {
+        TPFImageZoomState *imageZoomState = [self.imageZoomStates valueForKey:tempPreviewImageView.imageObject];
+        if (imageZoomState) {
+            tempPreviewImageView.scrollView.zoomScale = imageZoomState.zoomScale;
+            tempPreviewImageView.scrollView.contentSize = imageZoomState.contentSize;
+            tempPreviewImageView.scrollView.contentOffset = imageZoomState.contentOffset;
+            tempPreviewImageView.imageView.center = imageZoomState.center;
+            tempPreviewImageView.imageView.frame = imageZoomState.imageFrame;
+        } else {
+            [tempPreviewImageView restoreZoom];
+        }
+    }];
+}
+
+- (void)itemClickd:(UITapGestureRecognizer *)tapGestureRecognizer {
+    if (_itemClicked) _itemClicked(self.selectedIndex);
 }
 
 #pragma mark setter
@@ -251,7 +251,7 @@
     _images = images;
     _pageControl.numberOfPages = _images.count;
 
-    [_imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *obj, NSUInteger idx, BOOL *_Nonnull stop) {
+    [_imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *obj, NSUInteger idx, BOOL *_Nonnull stop) {
         [obj removeFromSuperview];
     }];
     [_imageViewArray removeAllObjects];
@@ -316,24 +316,23 @@
 
 - (void)setZoom:(Boolean)zoom {
     _zoom = zoom;
-    [self.imageViewArray enumerateObjectsUsingBlock:^(SCEPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+    [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
         obj.zoom = _zoom;
     }];
 }
 
-- (void)setAllowGravityRotate:(Boolean)allowGravityRotate{
+- (void)setAllowGravityRotate:(Boolean)allowGravityRotate {
     _allowGravityRotate = allowGravityRotate;
-    if(_allowGravityRotate){
+    if (_allowGravityRotate) {
         [self.rotationViewManager startMotionManager];
-    }
-    else{
+    } else {
         [_rotationViewManager stopMotionManager];
     }
 }
 
 #pragma mark getter
-- (SCEPreviewImageView *)getImageView:(int)index {
-    SCEPreviewImageView *imageView = [[SCEPreviewImageView alloc] initWithFrame:CGRectMake(index * (self.width + self.space), 0, self.width, self.height)];
+- (TPFPreviewImageView *)getImageView:(int)index {
+    TPFPreviewImageView *imageView = [[TPFPreviewImageView alloc] initWithFrame:CGRectMake(index * (self.width + self.space), 0, self.width, self.height)];
     imageView.backgroundColor = [UIColor clearColor];
 
     imageView.index = index;
@@ -371,11 +370,13 @@
     }
     return _pageControl;
 }
--(TPFRotationViewManager *)rotationViewManager{
-    if(!_rotationViewManager){
+
+- (TPFRotationViewManager *)rotationViewManager {
+    if (!_rotationViewManager) {
         _rotationViewManager = [[TPFRotationViewManager alloc] init];
         _rotationViewManager.targetView = self;
     }
     return _rotationViewManager;
 }
+
 @end

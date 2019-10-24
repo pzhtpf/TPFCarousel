@@ -44,6 +44,7 @@
     self.carousel.indicatorDots = YES;
     self.carousel.zoom = YES;
     self.carousel.selectedIndex = self.selectedIndex;
+    self.carousel.allowGravityRotate = YES;
     self.carousel.images = self.images;
 
     [self.view addSubview:self.carousel];

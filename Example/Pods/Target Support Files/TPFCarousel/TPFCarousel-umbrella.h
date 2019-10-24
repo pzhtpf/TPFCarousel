@@ -10,7 +10,7 @@
 #endif
 #endif
 
-#import "SCEPreviewImageView.h"
+#import "TPFPreviewImageView.h"
 #import "TPFCarousel.h"
 #import "TPFImageZoomState.h"
 #import "TPFRotationViewManager.h"

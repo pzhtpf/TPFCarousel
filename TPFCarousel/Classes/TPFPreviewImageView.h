@@ -1,5 +1,5 @@
 //
-//  SCEPreviewImageView.h
+//  TPFPreviewImageView.h
 //  SCEPreviewImage
 //
 //  Created by Roc.Tian on 2018/7/11.
@@ -8,12 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@class SCEPreviewImageView;
+@class TPFPreviewImageView;
 
-typedef void(^ZoomChanged)(SCEPreviewImageView *previewImageView,float scale,CGPoint centerPoint);
+typedef void(^ZoomChanged)(TPFPreviewImageView *previewImageView,float scale,CGPoint centerPoint);
 typedef void(^LoadingFinishedBlock)(BOOL loadingFinished);
 
-@interface SCEPreviewImageView : UIView<UIScrollViewDelegate>
+@interface TPFPreviewImageView : UIView<UIScrollViewDelegate>
 
 @property(strong,nonatomic) id imageObject;
 @property(strong,nonatomic) NSString *url;

@@ -1,22 +1,22 @@
 //
-//  SCEPreviewImageView.m
+//  TPFPreviewImageView.m
 //  SCEPreviewImage
 //
 //  Created by Roc.Tian on 2018/7/11.
 //  Copyright © 2018年 China SCE Property Holdings Co., Ltd. All rights reserved.
 //
 
-#import "SCEPreviewImageView.h"
+#import "TPFPreviewImageView.h"
 #import <YYWebImage/UIImageView+YYWebImage.h>
 #import <Masonry/Masonry.h>
 
-@interface SCEPreviewImageView()
+@interface TPFPreviewImageView()
 
 @property(strong,nonatomic) UIActivityIndicatorView *activityIndicatorView;
 
 @end
 
-@implementation SCEPreviewImageView
+@implementation TPFPreviewImageView
 
 -(id)init{
     self = [super init];

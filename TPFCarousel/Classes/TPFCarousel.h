@@ -12,6 +12,15 @@ NS_ASSUME_NONNULL_BEGIN
 typedef void(^SelectedIndexChanged)(int selectedIndex);
 typedef void(^ItemClicked)(int selectedIndex);
 
+typedef NS_ENUM(NSInteger, ScrollDirection) {
+    ScrollDirectionNone,
+    ScrollDirectionRight,
+    ScrollDirectionLeft,
+    ScrollDirectionUp,
+    ScrollDirectionDown,
+    ScrollDirectionCrazy,
+};
+
 
 @interface TPFCarousel : UIView
 
