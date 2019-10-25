@@ -44,7 +44,7 @@
     self.carousel.interval = 5;
     self.carousel.indicatorDots = YES;
     self.carousel.zoom = YES;
-    self.carousel.allowCircular = false;
+//    self.carousel.allowCircular = false;
     self.carousel.selectedIndexChanged = ^(int selectedIndexChanged){
 //        NSLog(@"回调后的选中：%d",selectedIndexChanged);
     };

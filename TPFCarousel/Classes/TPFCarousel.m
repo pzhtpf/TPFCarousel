@@ -17,6 +17,7 @@
 @property (nonatomic) float width;
 @property (nonatomic) float height;
 @property (nonatomic) float mainOriginX;
+@property (nonatomic) float lastContentOffsetX;
 @property (nonatomic) ScrollDirection scrollDirection;
 @property (strong, nonatomic) NSTimer *timer;
 @property (strong, nonatomic) UIPageControl *pageControl;
@@ -91,14 +92,7 @@
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    if(self.allowCircular){
-      if (scrollView.contentOffset.x != (self.width + self.space)) [self exchangePosition:scrollView];
-    }
-  else{
-      [self exchangePosition:scrollView];
-  }
-    
-    
+    [self exchangePosition:scrollView];
     self.autoplay = _autoplay;
 }
 
@@ -119,46 +113,71 @@
         return true;
     }
 }
+-(BOOL)getAllowChangeStatus{
+    if(self.allowCircular)
+        return self.allowCircular;
+    else{
+        if((self.scrollDirection == ScrollDirectionLeft && self.selectedIndex>self.images.count-2) ||
+           (self.scrollDirection == ScrollDirectionRight && self.selectedIndex<1))
+            return false;
+        
+        return true;
+    }
+}
 - (void)exchangePosition:(UIScrollView *)scrollView {
     
-    [self getSelectedIndex];
-    
-    if(!self.allowCircular && (self.selectedIndex==0 || self.selectedIndex== self.images.count-1)){
+    /*首先判断是否滑动了一屏，是否需要交换*/
+//    float scrollDistance = fabs(scrollView.contentOffset.x-self.lastContentOffsetX);
+//    NSLog(@"滑动距离：%f",scrollDistance);
+//    if(scrollDistance<self.width/2+self.space){
+//        return;
+//    }
+    if(self.scrollView.contentOffset.x == self.width+self.space)
         return;
-    }
     
-    [self syncImageZoomState];
-    if (scrollView.contentOffset.x == 0) {
-        [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
-            if (obj.frame.origin.x == 0) {
-                obj.frame = CGRectMake(self.width + self.space, 0, self.width, self.height);
-            } else if (obj.frame.origin.x == self.width + self.space) {
-                obj.frame = CGRectMake(0, 0, self.width, self.height);
-            }
-        }];
-    } else if (scrollView.contentOffset.x == (self.width + self.space) * 2) {
-        [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
-            if (obj.frame.origin.x == self.width + self.space) {
-                obj.frame = CGRectMake((self.width + self.space) * 2, 0, self.width, self.height);
-            } else if (obj.frame.origin.x == (self.width + self.space) * 2) {
-                obj.frame = CGRectMake(self.width + self.space, 0, self.width, self.height);
-            }
-        }];
-    }
-
-    scrollView.contentOffset = CGPointMake(self.width + self.space, 0);
-    [self loadMainImage];
+    [self getSelectedIndex];
+   
+    [self exchangingPosition];
+ 
+    self.lastContentOffsetX = scrollView.contentOffset.x;
+//    [self loadMainImage];
     [self resetImageZoomState];
+    self.scrollDirection = ScrollDirectionNone;
 
     if (_selectedIndexChanged) _selectedIndexChanged(_selectedIndex);
 }
+- (void)exchangingPosition{
+    
+//    if(![self getAllowChangeStatus])
+//        return;
+    
+    [self syncImageZoomState];
+//     if (self.scrollView.contentOffset.x == 0) {
+//         [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+//             if (obj.frame.origin.x == 0) {
+//                 obj.frame = CGRectMake(self.width + self.space, 0, self.width, self.height);
+//             } else if (obj.frame.origin.x == self.width + self.space) {
+//                 obj.frame = CGRectMake(0, 0, self.width, self.height);
+//             }
+//         }];
+//     } else if (self.scrollView.contentOffset.x == (self.width + self.space) * 2) {
+//         [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+//             if (obj.frame.origin.x == self.width + self.space) {
+//                 obj.frame = CGRectMake((self.width + self.space) * 2, 0, self.width, self.height);
+//             } else if (obj.frame.origin.x == (self.width + self.space) * 2) {
+//                 obj.frame = CGRectMake(self.width + self.space, 0, self.width, self.height);
+//             }
+//         }];
+//     }
 
+    [self loadMainImage];
+//     self.scrollView.contentOffset = CGPointMake(self.width + self.space, 0);
+}
 - (void)getSelectedIndex {
     
-    if(![self getAllowCircularStatus]){
-        self.scrollDirection = ScrollDirectionNone;
-        return;
-    }
+//    if(![self getAllowCircularStatus]){
+//        return;
+//    }
     
     if (self.scrollDirection == ScrollDirectionRight) self.selectedIndex--;
     else if (self.scrollDirection == ScrollDirectionLeft) self.selectedIndex++;
@@ -168,18 +187,22 @@
 
     _pageControl.currentPage = self.selectedIndex;
     NSLog(@"当前选中：%d", self.selectedIndex);
-
-    self.scrollDirection = ScrollDirectionNone;
 }
 
 - (void)loadMainImage {
     [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+//        CGPoint point = [obj convertPoint:CGPointMake(self.width/2, self.height/2) fromView:self.scrollView];
+//        CGPoint point = [self.scrollView convertPoint:CGPointMake(self.width/2, self.height/2) toView:obj];
+
+//        NSLog(@"%@",NSStringFromCGPoint(point));
         if (obj.frame.origin.x == self.mainOriginX) {
+//        if (obj.frame.origin.x - self.scrollView.contentOffset.x == 0) {
             int index = MIN(self.selectedIndex, (int)self.images.count - 1);
             index = MAX(0, index);
             obj.imageObject = self.images[index];
             __weak typeof(self) weakSelf = self;
             [obj starLoading:^(BOOL loadingFinished) {
+                weakSelf.scrollView.contentOffset = CGPointMake(weakSelf.width + weakSelf.space, 0);
                 [weakSelf loadOtherImage];
             }];
         }
@@ -188,7 +211,8 @@
 
 - (void)loadOtherImage {
     [self.imageViewArray enumerateObjectsUsingBlock:^(TPFPreviewImageView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
-        if (obj.frame.origin.x == 0) {
+        Boolean isNeedLoad = self.scrollView.contentOffset.x == (self.width+self.space);
+        if (obj.frame.origin.x == 0 && isNeedLoad) {
             int left = self.selectedIndex - 1;
             left = left < 0 ? (int)self.images.count - 1 : left;
             if (left >= 0 && left < self.images.count) {
@@ -196,7 +220,7 @@
                 [obj starLoading:^(BOOL loadingFinished) {
                 }];
             }
-        } else if (obj.frame.origin.x == (self.width + self.space) * 2) {
+        } else if (obj.frame.origin.x == (self.width + self.space) * 2 && isNeedLoad) {
             int right = self.selectedIndex + 1;
             right = right > (int)self.images.count - 1 ? 0 : right;
             if (right >= 0 && right < self.images.count) {
@@ -291,6 +315,7 @@
     } else if (_images.count == 1) {
         self.allowCircular = false;
         self.mainOriginX = 0;
+        self.lastContentOffsetX = self.mainOriginX;
         [self getImageView:0];
         [self loadMainImage];
     } else {
@@ -300,6 +325,7 @@
         self.mainOriginX = self.width + self.space;
         [self.scrollView setContentSize:CGSizeMake((self.width + self.space) * 3, self.height)];
         self.scrollView.contentOffset = CGPointMake(self.width + self.space, 0);
+        self.lastContentOffsetX = self.mainOriginX;
         [self loadMainImage];
     }
 
@@ -374,6 +400,23 @@
     imageView.index = index;
     imageView.imageView.contentMode = self.contentMode;
     imageView.zoom = self.zoom;
+    
+    imageView.tag = index;
+    
+    switch (index) {
+        case 0:
+            imageView.backgroundColor = [UIColor redColor];
+            break;
+        case 1:
+            imageView.backgroundColor = [UIColor greenColor];
+            break;
+        case 2:
+            imageView.backgroundColor = [UIColor blueColor];
+            break;
+            
+        default:
+            break;
+    }
 
     [self.scrollView addSubview:imageView];
     [self.imageViewArray addObject:imageView];
