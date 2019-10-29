@@ -54,7 +54,8 @@ typedef NS_ENUM(NSInteger, ScrollDirection) {
 @property(nonatomic) Boolean zoom;
 /* 是否允许重力感应旋转 默认false */
 @property(nonatomic) Boolean allowGravityRotate;
-
+/* 占位图片 */
+@property(strong,nonatomic) UIImage *placeholderImage;
 
 
 @end

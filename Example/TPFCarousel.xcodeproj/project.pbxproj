@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E46E1222367DFAE00539F63 /* icon_default.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E46E1212367DFAE00539F63 /* icon_default.png */; };
 		1EB719A1235DCE8900AA55AA /* TPFImagePreviewVController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB719A0235DCE8900AA55AA /* TPFImagePreviewVController.m */; };
 		256B3BEBB5CC15FB6F346B27 /* Pods_TPFCarousel_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F0BEA5D1D58DCD067CCC4C /* Pods_TPFCarousel_Tests.framework */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
@@ -39,6 +40,7 @@
 
 /* Begin PBXFileReference section */
 		07827AE11D7047425F31C112 /* TPFCarousel.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = TPFCarousel.podspec; path = ../TPFCarousel.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		1E46E1212367DFAE00539F63 /* icon_default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_default.png; sourceTree = "<group>"; };
 		1EB7199F235DCE8900AA55AA /* TPFImagePreviewVController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TPFImagePreviewVController.h; sourceTree = "<group>"; };
 		1EB719A0235DCE8900AA55AA /* TPFImagePreviewVController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TPFImagePreviewVController.m; sourceTree = "<group>"; };
 		272A47FE072865A9E3AECF47 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
@@ -109,6 +111,14 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		1E46E1202367DFAE00539F63 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				1E46E1212367DFAE00539F63 /* icon_default.png */,
+			);
+			path = Images;
+			sourceTree = "<group>";
+		};
 		6003F581195388D10070C39A = {
 			isa = PBXGroup;
 			children = (
@@ -146,6 +156,7 @@
 		6003F593195388D20070C39A /* Example for TPFCarousel */ = {
 			isa = PBXGroup;
 			children = (
+				1E46E1202367DFAE00539F63 /* Images */,
 				6003F59C195388D20070C39A /* TPFAppDelegate.h */,
 				6003F59D195388D20070C39A /* TPFAppDelegate.m */,
 				873B8AEA1B1F5CCA007FD442 /* Main.storyboard */,
@@ -288,6 +299,7 @@
 			files = (
 				873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */,
 				71719F9F1E33DC2100824A3D /* LaunchScreen.storyboard in Resources */,
+				1E46E1222367DFAE00539F63 /* icon_default.png in Resources */,
 				6003F5A9195388D20070C39A /* Images.xcassets in Resources */,
 				6003F598195388D20070C39A /* InfoPlist.strings in Resources */,
 			);

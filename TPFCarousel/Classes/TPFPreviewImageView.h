@@ -15,9 +15,15 @@ typedef void(^LoadingFinishedBlock)(BOOL loadingFinished);
 
 @interface TPFPreviewImageView : UIView<UIScrollViewDelegate>
 
+/* 图片对象，可能是图片链接，也可能是UIImage，也可能是图片Base64数据 */
 @property(strong,nonatomic) id imageObject;
+/* 图片链接 */
 @property(strong,nonatomic) NSString *url;
+/* 唯一标记 */
 @property(nonatomic) int index;
+/* 占位图片 */
+@property(strong,nonatomic) UIImage *placeholderImage;
+
 
 @property(strong,nonatomic) UIScrollView *scrollView;
 @property(strong,nonatomic) UIImageView *imageView;
